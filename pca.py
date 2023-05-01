@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 
 from os import path
 from sklearn.decomposition import PCA
-from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import accuracy_score
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.manifold import Isomap
 from numpy.linalg import eig
+from tqdm import tqdm
 
 # get the current working directory
 ROOT_DIR = path.abspath(os.curdir)
@@ -149,7 +150,7 @@ for k in kVals:
     test_transformed = pcaK.transform(pca_test_data)
     print(train_transformed.shape)
 
-    gaussianK = GaussianNB()
+    gaussianK = QuadraticDiscriminantAnalysis()
     gaussianK.fit(train_transformed, train_labels)
     train_preds = gaussianK.predict(train_transformed)
     test_preds = gaussianK.predict(test_transformed)
@@ -166,7 +167,7 @@ plt.ylabel('Train Accuracy')
 plt.xticks(kVals)
 plt.plot(kVals, trainAccHistory, label='Train Accuracy')
 plt.legend()
-plt.title('Train Accuracy For The Gaussian Model')
+plt.title('Train Accuracy For The Quadratic Gaussian Model')
 plt.show()
 
 plt.figure(figsize=(18, 12))
@@ -175,24 +176,24 @@ plt.ylabel('Test Accuracy')
 plt.xticks(kVals)
 plt.plot(kVals, testAccHistory, label='Test Accuracy', color='green')
 plt.legend()
-plt.title('Test Accuracy For The Gaussian Model')
+plt.title('Test Accuracy For The Quadratic Gaussian Model')
 plt.show()
 
 # Question 2
 trainAccHistory = []
 testAccHistory = []
-kVals = [k for k in range(1, 10)]
+kVals = [10 * k for k in range(1, 21)]
 
-for k in kVals:
-    lda = LinearDiscriminantAnalysis(n_components=k)
-    lda.fit(train_data, train_labels)
-    lda_transformed_train = lda.transform(train_data)
-    lda_transformed_test = lda.transform(test_data)
+for k in tqdm(kVals):
+    iso = Isomap(n_components=k)
+    iso.fit(train_data, train_labels)
+    iso_transformed_train = iso.transform(train_data)
+    iso_transformed_test = iso.transform(test_data)
 
-    gaussianK = GaussianNB()
-    gaussianK.fit(lda_transformed_train, train_labels)
-    train_preds = gaussianK.predict(lda_transformed_train)
-    test_preds = gaussianK.predict(lda_transformed_test)
+    gaussianK = QuadraticDiscriminantAnalysis()
+    gaussianK.fit(iso_transformed_train, train_labels)
+    train_preds = gaussianK.predict(iso_transformed_train)
+    test_preds = gaussianK.predict(iso_transformed_test)
 
     trainAccK = accuracy_score(train_labels, train_preds)
     testAccK = accuracy_score(test_labels, test_preds)  
@@ -201,19 +202,19 @@ for k in kVals:
     testAccHistory.append(testAccK)
 
 plt.figure(figsize=(18, 12))
-plt.xlabel('Number Of Dimensions in LDA')
+plt.xlabel('Number Of Dimensions in Isomap')
 plt.ylabel('Train Accuracy')
 plt.xticks(kVals)
 plt.plot(kVals, trainAccHistory, label='Train Accuracy')
 plt.legend()
-plt.title('Train Accuracy For The Gaussian Model')
+plt.title('Train Accuracy For The Quadratic Gaussian Model')
 plt.show()
 
 plt.figure(figsize=(18, 12))
-plt.xlabel('Number Of Dimensions in LDA')
+plt.xlabel('Number Of Dimensions in Isomap')
 plt.ylabel('Test Accuracy')
 plt.xticks(kVals)
 plt.plot(kVals, testAccHistory, label='Test Accuracy', color='green')
 plt.legend()
-plt.title('Test Accuracy For The Gaussian Model')
+plt.title('Test Accuracy For The Quadratic Gaussian Model')
 plt.show()
