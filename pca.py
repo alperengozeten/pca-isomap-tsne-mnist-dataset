@@ -12,6 +12,7 @@ ROOT_DIR = path.abspath(os.curdir)
 DATA_DIR = path.join(ROOT_DIR, 'digits')
 
 mat = scipy.io.loadmat(path.join(DATA_DIR, 'digits.mat'))
+np.random.seed(2023)
 
 x = mat['labels']
 print(x.shape)
@@ -57,7 +58,6 @@ pca.fit(train_data)
 
 print(pca.components_)
 print(pca.explained_variance_)
-print(pca.singular_values_)
 
 """
 plt.figure()
@@ -81,12 +81,48 @@ print(cumulative_explained_variance(pca.explained_variance_, 0.9))
 
 # Question 1.2
 train_mean = np.mean(train_data, axis=0)
-print(train_mean)
 
-# plot the image
-plt.figure()
-plt.axis('off')
-plt.title('The Mean Image From Training Data')
-train_mean = train_mean.reshape((20, 20, -1))
-plt.imshow(train_mean, cmap='gray')
-plt.show()
+def plot_image(data : np.ndarray):
+    # plot the image
+    plt.figure()
+    plt.axis('off')
+    plt.title('The Mean Image From Training Data')
+    data = data.reshape((20, 20, -1))
+    plt.imshow(data, cmap='gray')
+    plt.show()
+
+def plot_image_min_max_scaled(data : np.ndarray):
+    # plot the image
+    plt.figure()
+    plt.axis('off')
+    plt.title('The Mean Image From Training Data')
+    data = (data - data.min()) / (data.max() - data.min())
+    data = data.reshape((20, 20, -1))
+    plt.imshow(data, cmap='gray')
+    plt.show()
+
+plot_image(train_mean)
+
+# display the first PC
+plot_image(pca.components_[0, :])
+plot_image(pca.components_[1, :])
+plot_image(pca.components_[2, :])
+
+X = np.asarray(train_data).copy()
+mean = np.mean(X, axis=0, keepdims=True)
+
+# normalize the data
+X = X - mean
+
+#calculate the covariance matrix
+covX = (X.T @ X) / X.shape[0]
+
+# calculate the eigenvalues and eigenvectors
+eigenVals, eigenVectors = eig(covX)
+
+# sort the eigenvalues in descending order
+idx = eigenVals.argsort()[::-1]   
+eigenVals = eigenVals[idx]
+eigenVectors = eigenVectors[:,idx]
+
+print(eigenVectors)
