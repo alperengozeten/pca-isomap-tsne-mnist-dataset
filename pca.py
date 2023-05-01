@@ -128,17 +128,41 @@ print(eigenVectors)
 
 # the number of components picked
 kVals = [10 * k for k in range(1, 21)]
+trainAccHistory = []
+testAccHistory = []
 
-pca50 = PCA(n_components=50)
-pca50.fit(train_data)
-train_transformed = pca50.transform(train_data)
-test_transformed = pca50.transform(test_data)
-print(train_transformed.shape)
+for k in kVals:
+    pcaK = PCA(n_components=k)
+    pcaK.fit(train_data)
+    train_transformed = pcaK.transform(train_data)
+    test_transformed = pcaK.transform(test_data)
+    print(train_transformed.shape)
 
-gaussian50 = GaussianNB()
-gaussian50.fit(train_transformed, train_labels)
-train_preds = gaussian50.predict(train_transformed)
-test_preds = gaussian50.predict(test_transformed)
+    gaussianK = GaussianNB()
+    gaussianK.fit(train_transformed, train_labels)
+    train_preds = gaussianK.predict(train_transformed)
+    test_preds = gaussianK.predict(test_transformed)
 
-print(accuracy_score(train_labels, train_preds))
-print(accuracy_score(test_labels, test_preds))
+    trainAccK = accuracy_score(train_labels, train_preds)
+    testAccK = accuracy_score(test_labels, test_preds)
+
+    trainAccHistory.append(trainAccK)
+    testAccHistory.append(testAccK)
+
+plt.figure(figsize=(18, 12))
+plt.xlabel('Number Of First Principal Components')
+plt.ylabel('Train Accuracy')
+plt.xticks(kVals)
+plt.plot(kVals, trainAccHistory, label='Train Accuracy')
+plt.legend()
+plt.title('Train Accuracy For The Gaussian Model')
+plt.show()
+
+plt.figure(figsize=(18, 12))
+plt.xlabel('Number Of First Principal Components')
+plt.ylabel('Test Accuracy')
+plt.xticks(kVals)
+plt.plot(kVals, testAccHistory, label='Test Accuracy', color='green')
+plt.legend()
+plt.title('Test Accuracy For The Gaussian Model')
+plt.show()
