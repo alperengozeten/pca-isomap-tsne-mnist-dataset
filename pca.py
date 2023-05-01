@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from os import path
 from sklearn.decomposition import PCA
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
 from numpy.linalg import eig
 
 # get the current working directory
@@ -123,3 +125,20 @@ eigenVals = eigenVals[idx]
 eigenVectors = eigenVectors[:,idx]
 
 print(eigenVectors)
+
+# the number of components picked
+kVals = [10 * k for k in range(1, 21)]
+
+pca50 = PCA(n_components=50)
+pca50.fit(train_data)
+train_transformed = pca50.transform(train_data)
+test_transformed = pca50.transform(test_data)
+print(train_transformed.shape)
+
+gaussian50 = GaussianNB()
+gaussian50.fit(train_transformed, train_labels)
+train_preds = gaussian50.predict(train_transformed)
+test_preds = gaussian50.predict(test_transformed)
+
+print(accuracy_score(train_labels, train_preds))
+print(accuracy_score(test_labels, test_preds))
