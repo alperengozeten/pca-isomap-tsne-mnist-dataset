@@ -15,10 +15,7 @@ mat = scipy.io.loadmat(path.join(DATA_DIR, 'digits.mat'))
 np.random.seed(2023)
 
 x = mat['labels']
-print(x.shape)
-
 y = mat['digits']
-print(y.shape)
 
 # concatenate the data
 data = np.concatenate((x, y), axis=1)
