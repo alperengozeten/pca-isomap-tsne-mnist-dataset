@@ -17,8 +17,9 @@ DATA_DIR = path.join(ROOT_DIR, 'digits')
 mat = scipy.io.loadmat(path.join(DATA_DIR, 'digits.mat'))
 np.random.seed(2023)
 
-x = mat['labels']
-y = mat['digits']
+x = np.loadtxt(path.join(DATA_DIR, 'labels.txt'), dtype=np.int32)
+y = np.loadtxt(path.join(DATA_DIR, 'digits.txt'))
+x = x.reshape((5000, 1))
 
 # concatenate the data
 data = np.concatenate((x, y), axis=1)
@@ -53,8 +54,16 @@ train_data = train_data[:, 1:]
 print(train_labels.shape)
 print(train_data.shape)
 
+# Get the mean of the whole dataset
+digit_data = data[:, 1:]
+mean_data = np.mean(digit_data, axis=0)
+
+# Center the test and train data for PCA
+pca_train_data = train_data - mean_data
+pca_test_data = test_data - mean_data
+
 pca = PCA()
-pca.fit(train_data)
+pca.fit(pca_train_data)
 
 print(pca.components_)
 print(pca.explained_variance_)
@@ -101,16 +110,15 @@ def plot_image_min_max_scaled(data : np.ndarray):
     plt.imshow(data, cmap='gray')
     plt.show()
 
-"""
+# Plot the mean image before centering
 plot_image(train_mean)
 
 # display the first PC
 plot_image(pca.components_[0, :])
 plot_image(pca.components_[1, :])
 plot_image(pca.components_[2, :])
-"""
 
-X = np.asarray(train_data).copy()
+X = np.asarray(pca_train_data).copy()
 mean = np.mean(X, axis=0, keepdims=True)
 
 # normalize the data
@@ -136,9 +144,9 @@ testAccHistory = []
 
 for k in kVals:
     pcaK = PCA(n_components=k)
-    pcaK.fit(train_data)
-    train_transformed = pcaK.transform(train_data)
-    test_transformed = pcaK.transform(test_data)
+    pcaK.fit(pca_train_data)
+    train_transformed = pcaK.transform(pca_train_data)
+    test_transformed = pcaK.transform(pca_test_data)
     print(train_transformed.shape)
 
     gaussianK = GaussianNB()
