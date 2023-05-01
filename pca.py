@@ -7,6 +7,7 @@ from os import path
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from numpy.linalg import eig
 
 # get the current working directory
@@ -100,12 +101,14 @@ def plot_image_min_max_scaled(data : np.ndarray):
     plt.imshow(data, cmap='gray')
     plt.show()
 
+"""
 plot_image(train_mean)
 
 # display the first PC
 plot_image(pca.components_[0, :])
 plot_image(pca.components_[1, :])
 plot_image(pca.components_[2, :])
+"""
 
 X = np.asarray(train_data).copy()
 mean = np.mean(X, axis=0, keepdims=True)
@@ -160,6 +163,46 @@ plt.show()
 
 plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of First Principal Components')
+plt.ylabel('Test Accuracy')
+plt.xticks(kVals)
+plt.plot(kVals, testAccHistory, label='Test Accuracy', color='green')
+plt.legend()
+plt.title('Test Accuracy For The Gaussian Model')
+plt.show()
+
+# Question 2
+trainAccHistory = []
+testAccHistory = []
+kVals = [k for k in range(1, 10)]
+
+for k in kVals:
+    lda = LinearDiscriminantAnalysis(n_components=k)
+    lda.fit(train_data, train_labels)
+    lda_transformed_train = lda.transform(train_data)
+    lda_transformed_test = lda.transform(test_data)
+
+    gaussianK = GaussianNB()
+    gaussianK.fit(lda_transformed_train, train_labels)
+    train_preds = gaussianK.predict(lda_transformed_train)
+    test_preds = gaussianK.predict(lda_transformed_test)
+
+    trainAccK = accuracy_score(train_labels, train_preds)
+    testAccK = accuracy_score(test_labels, test_preds)  
+
+    trainAccHistory.append(trainAccK)
+    testAccHistory.append(testAccK)
+
+plt.figure(figsize=(18, 12))
+plt.xlabel('Number Of Dimensions in LDA')
+plt.ylabel('Train Accuracy')
+plt.xticks(kVals)
+plt.plot(kVals, trainAccHistory, label='Train Accuracy')
+plt.legend()
+plt.title('Train Accuracy For The Gaussian Model')
+plt.show()
+
+plt.figure(figsize=(18, 12))
+plt.xlabel('Number Of Dimensions in LDA')
 plt.ylabel('Test Accuracy')
 plt.xticks(kVals)
 plt.plot(kVals, testAccHistory, label='Test Accuracy', color='green')
