@@ -84,7 +84,7 @@ def cumulative_explained_variance(eigenVals, f : float):
     cum_ratios = np.cumsum(eigenVals) / np.sum(eigenVals)
     return (np.searchsorted(cum_ratios, f) + 1) # +1 since this function returns the index
 
-# Capture %80 variance
+# Capture %80 variance with heuristics
 print(cumulative_explained_variance(pca.explained_variance_, 0.8))
 
 # Question 1.2
@@ -112,10 +112,16 @@ def plot_image_min_max_scaled(data : np.ndarray):
 # Plot the mean image before centering
 plot_image(train_mean)
 
-# display the first PC
-plot_image(pca.components_[0, :])
-plot_image(pca.components_[1, :])
-plot_image(pca.components_[2, :])
+# display the first 40 PC's since it captures %80 variance
+fig, ax = plt.subplots(nrows=5, ncols=8, figsize=(18, 12))
+for index in range(40):
+    row = index // 8
+    col = index % 8
+    ax[row, col].set_axis_off()
+    component = pca.components_[index, :].reshape((20, 20, -1))
+    ax[row, col].imshow(component, cmap='gray')
+plt.suptitle('The First 40 Principal Components')
+plt.show()
 
 X = np.asarray(centered_train_data).copy()
 mean = np.mean(X, axis=0, keepdims=True)
