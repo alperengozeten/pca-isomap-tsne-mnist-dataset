@@ -1,12 +1,14 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn
+import pandas as pd
 
 from os import path
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import accuracy_score
-from sklearn.manifold import Isomap
+from sklearn.manifold import Isomap, TSNE
 from numpy.linalg import eig
 from tqdm import tqdm
 
@@ -182,6 +184,7 @@ plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
 
+"""
 # Question 2
 trainErrHistory = []
 testErrHistory = []
@@ -220,4 +223,27 @@ plt.xticks(kVals)
 plt.plot(kVals, testErrHistory, label='Test Classification Error', color='green')
 plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
+plt.show()
+"""
+
+tsne = TSNE(n_components=2, verbose=1, n_iter=300)
+centered_full_data = digit_data - mean_data
+
+embedded_full_data = tsne.fit_transform(centered_full_data)
+print(embedded_full_data.shape)
+
+df = pd.DataFrame()
+df['tsne-2d-one'] = embedded_full_data[:,0]
+df['tsne-2d-two'] = embedded_full_data[:,1]
+df['labels'] = x # set to initial labels
+
+plt.figure(figsize=(16,10))
+seaborn.scatterplot(
+    x="tsne-2d-one", y="tsne-2d-two",
+    hue="labels",
+    palette=seaborn.color_palette("hls", 10),
+    data=df,
+    legend="full",
+    alpha=0.3
+)
 plt.show()
