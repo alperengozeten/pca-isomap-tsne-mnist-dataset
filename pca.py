@@ -230,20 +230,20 @@ tsne = TSNE(n_components=2, verbose=1, n_iter=300)
 centered_full_data = digit_data - mean_data
 
 embedded_full_data = tsne.fit_transform(centered_full_data)
-print(embedded_full_data.shape)
 
 df = pd.DataFrame()
-df['tsne-2d-one'] = embedded_full_data[:,0]
-df['tsne-2d-two'] = embedded_full_data[:,1]
+df['first-dim'] = embedded_full_data[:,0]
+df['second-dim'] = embedded_full_data[:,1]
 df['labels'] = x # set to initial labels
 
 plt.figure(figsize=(16,10))
 seaborn.scatterplot(
-    x="tsne-2d-one", y="tsne-2d-two",
+    x="first-dim", y="second-dim",
     hue="labels",
     palette=seaborn.color_palette("hls", 10),
     data=df,
-    legend="full",
-    alpha=0.3
+    alpha=0.3,
+    legend="full"
 )
+plt.title('Digit Data Mapped to 2D')
 plt.show()
