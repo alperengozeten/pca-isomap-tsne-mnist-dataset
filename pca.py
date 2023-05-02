@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import scipy.io
 import matplotlib.pyplot as plt
 
 from os import path
@@ -15,7 +14,6 @@ from tqdm import tqdm
 ROOT_DIR = path.abspath(os.curdir)
 DATA_DIR = path.join(ROOT_DIR, 'digits')
 
-mat = scipy.io.loadmat(path.join(DATA_DIR, 'digits.mat'))
 np.random.seed(2023)
 
 x = np.loadtxt(path.join(DATA_DIR, 'labels.txt'), dtype=np.int32)
@@ -84,10 +82,10 @@ def cumulative_explained_variance(eigenVals, f : float):
 
     # get the cumulative ratios
     cum_ratios = np.cumsum(eigenVals) / np.sum(eigenVals)
-    return np.searchsorted(cum_ratios, f)
+    return (np.searchsorted(cum_ratios, f) + 1) # +1 since this function returns the index
 
-# Capture %90 variance
-print(cumulative_explained_variance(pca.explained_variance_, 0.9))
+# Capture %80 variance
+print(cumulative_explained_variance(pca.explained_variance_, 0.8))
 
 # Question 1.2
 train_mean = np.mean(train_data, axis=0)
@@ -140,15 +138,14 @@ print(eigenVectors)
 
 # the number of components picked
 kVals = [10 * k for k in range(1, 21)]
-trainAccHistory = []
-testAccHistory = []
+trainErrHistory = []
+testErrHistory = []
 
-for k in kVals:
+for k in tqdm(kVals):
     pcaK = PCA(n_components=k)
     pcaK.fit(centered_train_data)
     train_transformed = pcaK.transform(centered_train_data)
     test_transformed = pcaK.transform(centered_test_data)
-    print(train_transformed.shape)
 
     gaussianK = QuadraticDiscriminantAnalysis()
     gaussianK.fit(train_transformed, train_labels)
@@ -158,14 +155,14 @@ for k in kVals:
     trainErrK = 1 - accuracy_score(train_labels, train_preds)
     testErrK = 1 - accuracy_score(test_labels, test_preds)
 
-    trainAccHistory.append(trainErrK)
-    testAccHistory.append(testErrK)
+    trainErrHistory.append(trainErrK)
+    testErrHistory.append(testErrK)
 
 plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of First Principal Components')
 plt.ylabel('Train Classification Error')
 plt.xticks(kVals)
-plt.plot(kVals, trainAccHistory, label='Train Classification Error')
+plt.plot(kVals, trainErrHistory, label='Train Classification Error')
 plt.legend()
 plt.title('Train Classification Error For The Quadratic Gaussian Model')
 plt.show()
@@ -174,21 +171,21 @@ plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of First Principal Components')
 plt.ylabel('Test Classification Error')
 plt.xticks(kVals)
-plt.plot(kVals, testAccHistory, label='Test Classification Error', color='green')
+plt.plot(kVals, testErrHistory, label='Test Classification Error', color='green')
 plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
 
 # Question 2
-trainAccHistory = []
-testAccHistory = []
+trainErrHistory = []
+testErrHistory = []
 kVals = [10 * k for k in range(1, 21)]
 
 for k in tqdm(kVals):
-    iso = Isomap(n_components=k)
-    iso.fit(train_data, train_labels)
-    iso_transformed_train = iso.transform(train_data)
-    iso_transformed_test = iso.transform(test_data)
+    iso = Isomap(n_components=k) # n_neighbors default which is 5
+    iso.fit(centered_train_data, train_labels)
+    iso_transformed_train = iso.transform(centered_train_data)
+    iso_transformed_test = iso.transform(centered_test_data)
 
     gaussianK = QuadraticDiscriminantAnalysis()
     gaussianK.fit(iso_transformed_train, train_labels)
@@ -198,14 +195,14 @@ for k in tqdm(kVals):
     trainErrK = 1 - accuracy_score(train_labels, train_preds)
     testErrK = 1 - accuracy_score(test_labels, test_preds)  
 
-    trainAccHistory.append(trainErrK)
-    testAccHistory.append(testErrK)
+    trainErrHistory.append(trainErrK)
+    testErrHistory.append(testErrK)
 
 plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of Dimensions in Isomap')
 plt.ylabel('Train Classification Error')
 plt.xticks(kVals)
-plt.plot(kVals, trainAccHistory, label='Train Classification Error')
+plt.plot(kVals, trainErrHistory, label='Train Classification Error')
 plt.legend()
 plt.title('Train Classification Error For The Quadratic Gaussian Model')
 plt.show()
@@ -214,7 +211,7 @@ plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of Dimensions in Isomap')
 plt.ylabel('Test Classification Error')
 plt.xticks(kVals)
-plt.plot(kVals, testAccHistory, label='Test Classification Error', color='green')
+plt.plot(kVals, testErrHistory, label='Test Classification Error', color='green')
 plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
