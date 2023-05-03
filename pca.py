@@ -66,16 +66,6 @@ centered_test_data = test_data - mean_data
 pca = PCA()
 pca.fit(centered_train_data)
 
-print(pca.components_)
-print(pca.explained_variance_)
-
-"""
-plt.figure()
-plt.plot(pca.explained_variance_)
-plt.axhline(y = 0.1, color = 'r', linestyle = '-')
-plt.show()
-"""
-
 # returns the index where the cumulative explained variance exceeds f, which is between 0 and 1
 def cumulative_explained_variance(eigenVals, f : float):
     if f < 0 or f > 1:
@@ -87,7 +77,17 @@ def cumulative_explained_variance(eigenVals, f : float):
     return (np.searchsorted(cum_ratios, f) + 1) # +1 since this function returns the index
 
 # Capture %80 variance with heuristics
-print(cumulative_explained_variance(pca.explained_variance_, 0.8))
+threshold_index = cumulative_explained_variance(pca.explained_variance_, 0.8)
+print(threshold_index) # the output is 39
+
+plt.figure()
+plt.plot(pca.explained_variance_, label='eigenvalues')
+plt.xlabel('Index Of The Eigenvalue')
+plt.ylabel('Magnitude Of The Eigenvalue')
+plt.legend()
+plt.fill_between([x for x in range(threshold_index)], pca.explained_variance_[0:threshold_index], step="pre", alpha=0.4)
+plt.title('Eigenvalues In Descending Order')
+plt.show()
 
 # Question 1.2
 train_mean = np.mean(train_data, axis=0)
