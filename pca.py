@@ -78,7 +78,7 @@ def cumulative_explained_variance(eigenVals, f : float):
 
 # Capture %80 variance with heuristics
 threshold_index = cumulative_explained_variance(pca.explained_variance_, 0.8)
-print(threshold_index) # the output is 39
+print('The minimum number of principal components to ensure %80 variance: ' + str(threshold_index)) # the output is 39
 
 plt.figure()
 plt.plot(pca.explained_variance_, label='eigenvalues')
@@ -184,7 +184,6 @@ plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
 
-"""
 # Question 2
 trainErrHistory = []
 testErrHistory = []
@@ -224,7 +223,6 @@ plt.plot(kVals, testErrHistory, label='Test Classification Error', color='green'
 plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
-"""
 
 tsne = TSNE(n_components=2, verbose=1, n_iter=300)
 centered_full_data = digit_data - mean_data
