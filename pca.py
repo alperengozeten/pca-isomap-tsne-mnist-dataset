@@ -97,7 +97,7 @@ def plot_image(data : np.ndarray):
     plt.figure()
     plt.axis('off')
     plt.title('The Mean Image From Training Data')
-    data = data.reshape((20, 20, -1))
+    data = data.reshape((20, 20)).T
     plt.imshow(data, cmap='gray')
     plt.show()
 
@@ -107,7 +107,7 @@ def plot_image_min_max_scaled(data : np.ndarray):
     plt.axis('off')
     plt.title('The Mean Image From Training Data')
     data = (data - data.min()) / (data.max() - data.min())
-    data = data.reshape((20, 20, -1))
+    data = data.reshape((20, 20)).T
     plt.imshow(data, cmap='gray')
     plt.show()
 
@@ -120,7 +120,7 @@ for index in range(40):
     row = index // 8
     col = index % 8
     ax[row, col].set_axis_off()
-    component = pca.components_[index, :].reshape((20, 20, -1))
+    component = pca.components_[index, :].reshape((20, 20)).T
     ax[row, col].imshow(component, cmap='gray')
 plt.suptitle('The First 40 Principal Components')
 plt.show()
@@ -189,9 +189,12 @@ trainErrHistory = []
 testErrHistory = []
 kVals = [10 * k for k in range(1, 21)]
 
+# get the centered full data
+centered_full_data = digit_data - mean_data
+
 for k in tqdm(kVals):
     iso = Isomap(n_components=k) # n_neighbors default which is 5
-    iso.fit(centered_train_data, train_labels)
+    iso.fit(centered_full_data, x)
     iso_transformed_train = iso.transform(centered_train_data)
     iso_transformed_test = iso.transform(centered_test_data)
 
@@ -224,8 +227,7 @@ plt.legend()
 plt.title('Test Classification Error For The Quadratic Gaussian Model')
 plt.show()
 
-tsne = TSNE(n_components=2, verbose=1, n_iter=300)
-centered_full_data = digit_data - mean_data
+tsne = TSNE(n_components=2, verbose=1)
 
 embedded_full_data = tsne.fit_transform(centered_full_data)
 
