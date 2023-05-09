@@ -193,7 +193,7 @@ kVals = [10 * k for k in range(1, 21)]
 centered_full_data = digit_data - mean_data
 
 for k in tqdm(kVals):
-    iso = Isomap(n_components=k) # n_neighbors default which is 5
+    iso = Isomap(n_components=k, n_neighbors=50) # the default for n_neighbors is 5
     iso.fit(centered_full_data, x)
     iso_transformed_train = iso.transform(centered_train_data)
     iso_transformed_test = iso.transform(centered_test_data)
@@ -209,6 +209,7 @@ for k in tqdm(kVals):
     trainErrHistory.append(trainErrK)
     testErrHistory.append(testErrK)
 
+print(min(testErrHistory))
 plt.figure(figsize=(18, 12))
 plt.xlabel('Number Of Dimensions in Isomap')
 plt.ylabel('Train Classification Error')
